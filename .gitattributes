@@ -1,0 +1,16 @@
+* text=auto
+*.py text eol=lf
+*.png binary
+*.jpg binary
+*.mp4 binary
+*.gif binary
+*.bin binary
+*.blob binary
+*.pt binary
+*.onnx binary
+*.tflite binary
+*.xlsx binary
+*.pptx binary
+*.zip binary
+*.conf binary
+*.pdf binary

@@ -1,0 +1,175 @@
+<mxfile host="app.diagrams.net">
+  <diagram name="Page-1" id="OtXJh_EzmB6etQmHVBxi">
+    <mxGraphModel dx="2308" dy="863" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="2" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontSize=15;fontStyle=1;fontColor=#0ea5e9;" value="Architecture du Projet : Comparaison WebCam / OpenMV / HuskyLens pour Contrôle Gestuel de Robot (RP2040)" vertex="1">
+          <mxGeometry height="35" width="1040" x="40" y="15" as="geometry" />
+        </mxCell>
+        <mxCell id="o0" parent="1" style="text;html=1;strokeColor=none;fillColor=#10b981;align=center;verticalAlign=middle;fontSize=11;fontStyle=1;fontColor=#ffffff;rounded=1;arcSize=50;" value="3 Solutions de Vision" vertex="1">
+          <mxGeometry height="30" width="200" x="40" y="65" as="geometry" />
+        </mxCell>
+        <mxCell id="o1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#10b981;fontSize=10;fontStyle=1;" value="WebCam + PC&#xa;MediaPipe&#xa;Traitement déporté" vertex="1">
+          <mxGeometry height="65" width="200" x="40" y="115" as="geometry" />
+        </mxCell>
+        <mxCell id="o2" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#10b981;fontSize=10;fontStyle=1;" value="OpenMV (STM32 H7)&#xa;TinyML — Edge Impulse&#xa;Traitement embarqué" vertex="1">
+          <mxGeometry height="65" width="200" x="40" y="200" as="geometry" />
+        </mxCell>
+        <mxCell id="o3" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#10b981;fontSize=10;fontStyle=1;" value="HuskyLens&#xa;Object Classification&#xa;Traitement embarqué" vertex="1">
+          <mxGeometry height="65" width="200" x="40" y="285" as="geometry" />
+        </mxCell>
+        <mxCell id="r0" parent="1" style="text;html=1;strokeColor=none;fillColor=#7c3aed;align=center;verticalAlign=middle;fontSize=11;fontStyle=1;fontColor=#ffffff;rounded=1;arcSize=50;" value="RP2040 — Robot (CircuitPython)" vertex="1">
+          <mxGeometry height="30" width="260" x="370" y="65" as="geometry" />
+        </mxCell>
+        <mxCell id="r1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#7c3aed;fontSize=10;fontStyle=1;" value="command_handler()&#xa;Réception JSON&#xa;via USB série" vertex="1">
+          <mxGeometry height="60" width="260" x="370" y="115" as="geometry" />
+        </mxCell>
+        <mxCell id="r2" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#7c3aed;fontSize=10;fontStyle=1;" value="control_loop()&#xa;Pilotage moteurs&#xa;selon le mode courant" vertex="1">
+          <mxGeometry height="60" width="260" x="370" y="205" as="geometry" />
+        </mxCell>
+        <mxCell id="r3" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#7c3aed;fontSize=10;fontStyle=1;" value="update_odometry()&#xa;Encodeurs + angle IMU&#xa;Position (x, y)" vertex="1">
+          <mxGeometry height="60" width="260" x="370" y="295" as="geometry" />
+        </mxCell>
+        <mxCell id="r4" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#7c3aed;fontSize=10;fontStyle=1;" value="Lecture HC-SR04&#xa;Distance obstacle&#xa;(cm)" vertex="1">
+          <mxGeometry height="60" width="260" x="370" y="385" as="geometry" />
+        </mxCell>
+        <mxCell id="r5" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#7c3aed;fontSize=10;fontStyle=1;" value="calibrate_gyro_bias()&#xa;Calibration MPU6050&#xa;au démarrage" vertex="1">
+          <mxGeometry height="60" width="260" x="370" y="475" as="geometry" />
+        </mxCell>
+        <mxCell id="q0" parent="1" style="text;html=1;strokeColor=none;fillColor=#f59e0b;align=center;verticalAlign=middle;fontSize=11;fontStyle=1;fontColor=#ffffff;rounded=1;arcSize=50;" value="Communication &amp; Mesures" vertex="1">
+          <mxGeometry height="30" width="200" x="760" y="65" as="geometry" />
+        </mxCell>
+        <mxCell id="q1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#f59e0b;fontSize=10;fontStyle=1;" value="Protocole JSON&#xa;{&quot;cmd&quot;: ...}&#xa;Renvoi périodique 150 ms" vertex="1">
+          <mxGeometry height="60" width="200" x="760" y="115" as="geometry" />
+        </mxCell>
+        <mxCell id="q2" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#f59e0b;fontSize=10;fontStyle=1;" value="Ping / Pong&#xa;Mesure de la latence&#xa;de communication" vertex="1">
+          <mxGeometry height="60" width="200" x="760" y="200" as="geometry" />
+        </mxCell>
+        <mxCell id="q3" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#f59e0b;fontSize=10;fontStyle=1;" value="Bus I2C partagé&#xa;MPU6050 (0x68)&#xa;INA219 (0x40)" vertex="1">
+          <mxGeometry height="60" width="200" x="760" y="285" as="geometry" />
+        </mxCell>
+        <mxCell id="q4" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#ef4444;fontSize=10;fontStyle=1;" value="Scripts de benchmark&#xa;Latence, FPS, Fiabilité, Conso&#xa;Export CSV / Excel" vertex="1">
+          <mxGeometry height="60" width="200" x="760" y="375" as="geometry" />
+        </mxCell>
+        <mxCell id="a0" parent="1" style="text;html=1;strokeColor=none;fillColor=#0ea5e9;align=center;verticalAlign=middle;fontSize=11;fontStyle=1;fontColor=#ffffff;rounded=1;arcSize=50;" value="Actionneurs / Capteurs" vertex="1">
+          <mxGeometry height="30" width="200" x="760" y="470" as="geometry" />
+        </mxCell>
+        <mxCell id="a1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#0ea5e9;fontSize=10;fontStyle=1;" value="Moteurs (x2)&#xa;Driver TB6612FNG&#xa;Contrôle PWM" vertex="1">
+          <mxGeometry height="55" width="200" x="760" y="520" as="geometry" />
+        </mxCell>
+        <mxCell id="a2" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#0ea5e9;fontSize=10;" value="HC-SR04&#xa;Détection d&#39;obstacle" vertex="1">
+          <mxGeometry height="45" width="200" x="760" y="585" as="geometry" />
+        </mxCell>
+        <mxCell id="a3" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#0ea5e9;fontSize=10;" value="MPU6050&#xa;Gyroscope / angle" vertex="1">
+          <mxGeometry height="45" width="200" x="760" y="640" as="geometry" />
+        </mxCell>
+        <mxCell id="a4" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#0ea5e9;fontSize=10;" value="INA219&#xa;Mesure de consommation (mW)" vertex="1">
+          <mxGeometry height="45" width="200" x="760" y="695" as="geometry" />
+        </mxCell>
+        <mxCell id="bot" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#070b14;strokeColor=#0ea5e9;fontSize=10;fontStyle=1;fontColor=#0ea5e9;" value="Plateforme Robot IOT Car : RP2040 · TB6612FNG · HC-SR04 · MPU6050 · Encodeurs magnétiques" vertex="1">
+          <mxGeometry height="35" width="1040" x="40" y="761" as="geometry" />
+        </mxCell>
+        <mxCell id="ar1" edge="1" parent="1" source="o1" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#10b981;strokeWidth=2;fontColor=#10b981;fontSize=8;fontStyle=1;" target="r1" value="USB série (JSON)">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="340" y="130" />
+              <mxPoint x="340" y="130" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ar2" edge="1" parent="1" source="o2" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#10b981;strokeWidth=2;fontColor=#10b981;fontSize=8;fontStyle=1;" target="r1" value="USB série (JSON)">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="280" y="232" />
+              <mxPoint x="280" y="145" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ar3" edge="1" parent="1" source="o3" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#10b981;strokeWidth=2;fontColor=#10b981;fontSize=8;fontStyle=1;" target="r1" value="USB série (JSON)">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="320" y="318" />
+              <mxPoint x="320" y="160" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ar4" edge="1" parent="1" source="r1" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#7c3aed;strokeWidth=2;" target="r2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ar5" edge="1" parent="1" source="r2" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#0ea5e9;strokeWidth=2;fontColor=#0ea5e9;fontSize=8;" target="a1" value="PWM">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="720" y="235" />
+              <mxPoint x="720" y="548" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ar6" edge="1" parent="1" source="a2" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#0ea5e9;strokeWidth=2;fontColor=#0ea5e9;fontSize=8;" target="r4" value="distance">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="680" y="608" />
+              <mxPoint x="680" y="415" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ar7" edge="1" parent="1" source="a3" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#0ea5e9;strokeWidth=2;fontColor=#0ea5e9;fontSize=8;dashed=1;" target="r5" value="I2C">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ar8" edge="1" parent="1" source="r5" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#7c3aed;strokeWidth=1;dashed=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;" target="r3">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="330" y="505" />
+              <mxPoint x="330" y="325" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ar9" edge="1" parent="1" source="q3" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#f59e0b;strokeWidth=1;dashed=1;fontColor=#f59e0b;fontSize=8;" target="a4" value="I2C (0x40)">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1040" y="315" />
+              <mxPoint x="1040" y="730" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ar10" edge="1" parent="1" source="q1" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#7c3aed;strokeWidth=1;dashed=1;" target="r1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ar11" edge="1" parent="1" source="q2" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#ef4444;strokeWidth=2;entryX=1;entryY=0.25;entryDx=0;entryDy=0;" target="q4">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1000" y="230" />
+              <mxPoint x="1000" y="390" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ar12" edge="1" parent="1" source="a4" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#ef4444;strokeWidth=2;" target="q4">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1000" y="710" />
+              <mxPoint x="1000" y="420" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="l0" parent="1" style="text;html=1;fontStyle=1;fontSize=9;strokeColor=none;fillColor=none;" value="Légende :" vertex="1">
+          <mxGeometry height="22" width="70" x="50" y="816" as="geometry" />
+        </mxCell>
+        <mxCell id="l1" parent="1" style="rounded=1;fillColor=#d5e8d4;strokeColor=#10b981;fontSize=8;" value="Solutions de Vision" vertex="1">
+          <mxGeometry height="22" width="120" x="125" y="816" as="geometry" />
+        </mxCell>
+        <mxCell id="l2" parent="1" style="rounded=1;fillColor=#e1d5e7;strokeColor=#7c3aed;fontSize=8;" value="RP2040 (CircuitPython)" vertex="1">
+          <mxGeometry height="22" width="140" x="255" y="816" as="geometry" />
+        </mxCell>
+        <mxCell id="l3" parent="1" style="rounded=1;fillColor=#fff2cc;strokeColor=#f59e0b;fontSize=8;" value="Communication / Mesures" vertex="1">
+          <mxGeometry height="22" width="145" x="405" y="816" as="geometry" />
+        </mxCell>
+        <mxCell id="l4" parent="1" style="rounded=1;fillColor=#dae8fc;strokeColor=#0ea5e9;fontSize=8;" value="Actionneurs / Capteurs" vertex="1">
+          <mxGeometry height="22" width="130" x="560" y="816" as="geometry" />
+        </mxCell>
+        <mxCell id="l5" parent="1" style="rounded=1;fillColor=#f8cecc;strokeColor=#ef4444;fontSize=8;" value="Benchmark" vertex="1">
+          <mxGeometry height="22" width="80" x="700" y="816" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

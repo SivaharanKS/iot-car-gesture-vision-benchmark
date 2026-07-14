@@ -1,0 +1,9 @@
+path: ./dataset_yolo
+train: images/train
+val: images/val
+
+names:
+  0: Forward
+  1: Left
+  2: Right
+  3: Stop

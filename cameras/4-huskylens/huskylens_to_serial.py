@@ -1,25 +1,25 @@
 """
 huskylens_to_serial.py
 =======================
-Lecture directe de la HuskyLens via son port USB (bibliotheque officielle
-huskylib.py), mapping du geste reconnu (ID appris) vers une commande JSON,
-et envoi de cette commande au robot sur un second port serie.
+Direct reading of the HuskyLens over its USB port (official huskylib.py
+library), mapping the recognized gesture (learned ID) to a JSON command,
+and sending that command to the robot over a second serial port.
 
-Architecture :
-    HuskyLens --(USB, port serie direct)--> PC --(USB)--> Robot RP2040
+Architecture:
+    HuskyLens --(USB, direct serial port)--> PC --(USB)--> RP2040 Robot
 
-Prerequis :
+Prerequisites:
     - pip install pyserial pypng
-    - Le fichier huskylib.py (telecharge depuis
+    - The huskylib.py file (downloaded from
       https://github.com/HuskyLens/HUSKYLENSPython/tree/master/HUSKYLENS)
-      doit se trouver dans le meme dossier que ce script.
-    - La HuskyLens doit avoir ete entrainee en mode "Object Classification"
-      avec les 5 classes suivantes (memes IDs que le mapping ci-dessous) :
-          ID 1 = Avancer  (poing ferme)
-          ID 2 = Stop     (main ouverte)
-          ID 3 = Gauche   (index + pouce)
-          ID 4 = Droite   (index + auriculaire)
-          ID 5 = Neutre   (main absente / position de repos)
+      must be located in the same folder as this script.
+    - The HuskyLens must have been trained in "Object Classification" mode
+      with the following 5 classes (same IDs as the mapping below):
+          ID 1 = Forward  (closed fist)
+          ID 2 = Stop     (open hand)
+          ID 3 = Left     (index + thumb)
+          ID 4 = Right    (index + pinky)
+          ID 5 = Neutral  (no hand / rest position)
 """
 
 import time
@@ -28,42 +28,42 @@ import serial
 from huskylib import HuskyLensLibrary
 
 # ----------------------------------------------------------------
-# Parametres a adapter
+# Parameters to adapt
 # ----------------------------------------------------------------
-COM_HUSKY = "COM25"   # port serie de la HuskyLens
-COM_ROBOT = "COM22"   # port serie du robot RP2040
+COM_HUSKY = "COM25"   # HuskyLens serial port
+COM_ROBOT = "COM22"   # RP2040 robot serial port
 BAUDRATE_ROBOT = 115200
 
-SEND_INTERVAL = 0.15   # renvoi periodique de la commande active (secondes),
-                       # le robot s'arrete automatiquement apres 0.4s de silence
-CONFIRM_COUNT = 5      # nombre de detections consecutives identiques requises
-                       # avant de valider un changement de geste (anti faux-positif)
+SEND_INTERVAL = 0.15   # periodic resend of the active command (seconds),
+                       # the robot stops automatically after 0.4s of silence
+CONFIRM_COUNT = 5      # number of identical consecutive detections required
+                       # before validating a gesture change (anti-false-positive)
 
 ID_TO_COMMAND = {
     1: "forward",
     2: "stop",
     3: "turn_left",
     4: "turn_right",
-    # 5 (neutre) et tout ID inconnu -> pas de mapping direct, traite comme "stop"
+    # 5 (neutral) and any unknown ID -> no direct mapping, treated as "stop"
 }
 
 GESTE_LABEL = {
-    1: "Avancer",
+    1: "Forward",
     2: "Stop",
-    3: "Gauche",
-    4: "Droite",
-    5: "Neutre",
+    3: "Left",
+    4: "Right",
+    5: "Neutral",
 }
 
 
 def lire_id_geste(hl):
-    """Interroge la HuskyLens et renvoie l'ID du geste detecte,
-    ou None si rien n'est detecte.
+    """Queries the HuskyLens and returns the ID of the detected gesture,
+    or None if nothing is detected.
 
-    Note : la methode learned() de huskylib.py renvoie directement un
-    seul objet Block (et non une liste comme le suggere la documentation
-    officielle) -- comportement documente dans l'issue #18 du depot
-    HUSKYLENSPython (https://github.com/HuskyLens/HUSKYLENSPython/issues/18).
+    Note: the learned() method of huskylib.py directly returns a
+    single Block object (not a list as the official documentation
+    suggests) -- a behavior documented in issue #18 of the
+    HUSKYLENSPython repository (https://github.com/HuskyLens/HUSKYLENSPython/issues/18).
     """
     try:
         objet = hl.learned()
@@ -75,32 +75,32 @@ def lire_id_geste(hl):
 
 
 def main():
-    print("Connexion a la HuskyLens...")
+    print("Connecting to the HuskyLens...")
     try:
         hl = HuskyLensLibrary("SERIAL", COM_HUSKY)
         print(hl.knock())
         hl.algorthim("ALGORITHM_OBJECT_CLASSIFICATION")
     except Exception as e:
-        print(f"Erreur de connexion a la HuskyLens ({COM_HUSKY}) : {e}")
+        print(f"Connection error to the HuskyLens ({COM_HUSKY}): {e}")
         return
 
-    print("Connexion au robot...")
+    print("Connecting to the robot...")
     try:
         ser_robot = serial.Serial(COM_ROBOT, BAUDRATE_ROBOT, timeout=0)
     except serial.SerialException as e:
-        print(f"Erreur de connexion au robot ({COM_ROBOT}) : {e}")
+        print(f"Connection error to the robot ({COM_ROBOT}): {e}")
         return
 
-    # Redemarrage logiciel du robot (sortie REPL / raw REPL puis relance
-    # de code.py), indispensable pour etre sur que le robot execute bien
-    # code.py et non bloque a l'invite interactive (>>>).
+    # Software restart of the robot (exit REPL / raw REPL then relaunch
+    # code.py), essential to make sure the robot is actually running
+    # code.py and is not stuck at the interactive prompt (>>>).
     time.sleep(0.3)
     ser_robot.write(b'\x03')
     time.sleep(0.2)
     ser_robot.write(b'\x02')
     time.sleep(0.2)
     ser_robot.write(b'\x04')
-    print("Redemarrage du robot en cours...")
+    print("Restarting the robot...")
 
     boot_deadline = time.monotonic() + 3.0
     while time.monotonic() < boot_deadline:
@@ -110,7 +110,7 @@ def main():
                 print(f"[Boot] {boot_line}")
         time.sleep(0.02)
 
-    print("Systeme pret. Ctrl+C pour arreter.\n")
+    print("System ready. Ctrl+C to stop.\n")
 
     candidate_id = None
     candidate_count = 0
@@ -124,7 +124,7 @@ def main():
         while True:
             detected_id = lire_id_geste(hl)
 
-            # --- Filtrage par confirmation (anti faux-positif) ---
+            # --- Confirmation-based filtering (anti-false-positive) ---
             if detected_id == candidate_id:
                 candidate_count += 1
             else:
@@ -134,7 +134,7 @@ def main():
             if candidate_count >= CONFIRM_COUNT:
                 stable_id = candidate_id
 
-            # --- Determination de la commande a envoyer ---
+            # --- Determining the command to send ---
             cmd = ID_TO_COMMAND.get(stable_id, "stop")
 
             now = time.monotonic()
@@ -144,13 +144,13 @@ def main():
                 last_send_time = now
 
                 if stable_id != last_print_id:
-                    label = GESTE_LABEL.get(stable_id, "Inconnu")
-                    print(f"[HuskyLens] Geste stable : {label} (ID={stable_id}) -> {cmd}")
+                    label = GESTE_LABEL.get(stable_id, "Unknown")
+                    print(f"[HuskyLens] Stable gesture: {label} (ID={stable_id}) -> {cmd}")
                     last_print_id = stable_id
 
-            # --- Affichage des messages renvoyes par le robot (statut) ---
-            # Permet de verifier que le robot recoit bien les commandes et
-            # execute son control_loop (odometrie, mode courant, etc.)
+            # --- Displaying the messages returned by the robot (status) ---
+            # Allows checking that the robot is correctly receiving commands and
+            # running its control_loop (odometry, current mode, etc.)
             while ser_robot.in_waiting:
                 robot_line = ser_robot.readline().decode(errors="ignore").strip()
                 if robot_line:
@@ -162,7 +162,7 @@ def main():
             time.sleep(0.02)
 
     except KeyboardInterrupt:
-        print("\nArret demande par l'utilisateur.")
+        print("\nStop requested by the user.")
     finally:
         ser_robot.close()
 

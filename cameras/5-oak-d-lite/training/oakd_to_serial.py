@@ -6,7 +6,7 @@ import json
 import time
 
 # ----------------------------------------------------------------
-# Parametres a adapter
+# Parameters to adapt
 # ----------------------------------------------------------------
 BLOB_PATH = "best.blob"
 LABELS = ["Forward", "Left", "Right", "Stop"]
@@ -29,7 +29,7 @@ LABEL_TO_CMD = {
 
 
 def decoder_yolo(output_tensor, conf_threshold=CONF_THRESHOLD):
-    """Decode la sortie brute YOLOv8 (1, 8, 2100) -> label, score, boite (cx,cy,w,h normalises)."""
+    """Decodes the raw YOLOv8 output (1, 8, 2100) -> label, score, box (cx,cy,w,h normalized)."""
     data = output_tensor.reshape(8, -1).T  # -> (2100, 8)
     scores_classes = data[:, 4:8]
     class_ids = np.argmax(scores_classes, axis=1)
@@ -39,7 +39,7 @@ def decoder_yolo(output_tensor, conf_threshold=CONF_THRESHOLD):
     if scores[meilleur_idx] < conf_threshold:
         return "none", 0.0, None
 
-    boite = data[meilleur_idx, 0:4]  # cx, cy, w, h (en pixels, echelle INPUT_SIZE)
+    boite = data[meilleur_idx, 0:4]  # cx, cy, w, h (in pixels, INPUT_SIZE scale)
     return LABELS[class_ids[meilleur_idx]], float(scores[meilleur_idx]), boite
 
 
@@ -75,7 +75,7 @@ def main():
         nnQueue = nn.out.createOutputQueue()
 
         pipeline.start()
-        print("Pilotage OAK-D Lite demarre. Ferme la fenetre ou Ctrl+C pour arreter.")
+        print("OAK-D Lite control started. Close the window or press Ctrl+C to stop.")
 
         label_affiche, score_affiche, boite_affichee = "none", 0.0, None
 
@@ -86,7 +86,7 @@ def main():
             label, score, boite = decoder_yolo(output)
             label_affiche, score_affiche, boite_affichee = label, score, boite
 
-            # ---- Logique de pilotage (identique a avant) ----
+            # ---- Control logic (identical to before) ----
             if label == dernier_label:
                 compteur_confirm += 1
             else:
@@ -114,7 +114,7 @@ def main():
             while ser_robot.in_waiting:
                 print("[Robot]", ser_robot.readline())
 
-            # ---- Affichage visuel ----
+            # ---- Visual display ----
             if previewQueue.has():
                 inFrame = previewQueue.get()
                 frame = inFrame.getCvFrame()
@@ -131,7 +131,7 @@ def main():
                 cv2.putText(frame, texte, (10, 25), cv2.FONT_HERSHEY_SIMPLEX,
                             0.8, (0, 255, 0), 2)
 
-                cv2.imshow("OAK-D Lite - pilotage", frame)
+                cv2.imshow("OAK-D Lite - control", frame)
 
             if cv2.waitKey(1) == ord('q'):
                 break

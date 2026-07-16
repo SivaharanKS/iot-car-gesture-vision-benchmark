@@ -1,9 +1,9 @@
 """
-Etape 4 : Envoi des commandes de gestes au robot via liaison serie (USB)
+Step 4: Sending gesture commands to the robot over a serial (USB) link
 --------------------------------------------------------------------------
-Detecte les 4 gestes de la main et envoie une commande JSON au robot
-en continu, tant que le geste est detecte.
-Appuie sur 'q' pour quitter.
+Detects the 4 hand gestures and continuously sends a JSON command
+to the robot for as long as the gesture is detected.
+Press 'q' to quit.
 """
 
 import cv2
@@ -13,13 +13,13 @@ import json
 import time
 
 # ----------------------------------------------------------------
-# A ADAPTER : nom du port serie du robot (voir Gestionnaire de peripheriques)
-# Exemples : "COM5" sur Windows, "/dev/ttyACM0" sur Linux
+# TO ADAPT: name of the robot's serial port (see Device Manager)
+# Examples: "COM5" on Windows, "/dev/ttyACM0" on Linux
 # ----------------------------------------------------------------
 SERIAL_PORT = "COM22"
 BAUDRATE = 115200
 
-# Intervalle minimum entre deux renvois de la meme commande (secondes)
+# Minimum interval between two resends of the same command (seconds)
 SEND_INTERVAL = 0.15
 
 mp_hands = mp.solutions.hands
@@ -48,22 +48,22 @@ def classify_gesture(finger_states):
     thumb, index, middle, ring, pinky = finger_states
 
     if not thumb and not index and not middle and not ring and not pinky:
-        return "forward", "Poing ferme"
+        return "forward", "Closed fist"
 
     if thumb and index and middle and ring and pinky:
-        return "stop", "Main ouverte"
+        return "stop", "Open hand"
 
     if thumb and index and not middle and not ring and not pinky:
-        return "turn_left", "Index + pouce"
+        return "turn_left", "Index + thumb"
 
     if not thumb and index and not middle and not ring and pinky:
-        return "turn_right", "Index + auriculaire"
+        return "turn_right", "Index + pinky"
 
-    return None, "Geste non reconnu"
+    return None, "Gesture not recognized"
 
 
 def build_json_command(gesture_cmd):
-    """Construit le message JSON attendu par code.py sur le robot."""
+    """Builds the JSON message expected by code.py on the robot."""
     if gesture_cmd == "forward":
         return {"cmd": "forward"}
     if gesture_cmd == "stop":
@@ -76,29 +76,29 @@ def build_json_command(gesture_cmd):
 
 
 def main():
-    # Connexion au port serie du robot
+    # Connect to the robot's serial port
     try:
         ser = serial.Serial(SERIAL_PORT, BAUDRATE, timeout=0)
-        print(f"Connecte au robot sur {SERIAL_PORT}")
+        print(f"Connected to the robot on {SERIAL_PORT}")
     except serial.SerialException as e:
-        print(f"Erreur de connexion serie : {e}")
-        print("Verifie le nom du port (SERIAL_PORT) et que rien d'autre "
-              "n'utilise deja ce port (ex : Thonny, Mu Editor).")
+        print(f"Serial connection error: {e}")
+        print("Check the port name (SERIAL_PORT) and make sure nothing else "
+              "is already using this port (e.g. Thonny, Mu Editor).")
         return
 
-    # Le robot peut etre reste bloque sur l'invite interactive (REPL, ">>>")
-    # suite a une session Thonny/Mu precedente. On force un redemarrage logiciel
-    # (equivalent Ctrl+D) pour qu'il quitte le REPL et relance code.py proprement.
+    # The robot may have been left stuck at the interactive prompt (REPL, ">>>")
+    # following a previous Thonny/Mu session. We force a software restart
+    # (equivalent to Ctrl+D) so it exits the REPL and relaunches code.py cleanly.
     time.sleep(0.3)
-    ser.write(b'\x03')   # Ctrl-C : interrompt un eventuel code en cours
+    ser.write(b'\x03')   # Ctrl-C: interrupts any code currently running
     time.sleep(0.2)
-    ser.write(b'\x02')   # Ctrl-B : sort du raw REPL (laisse par Thonny) si necessaire
+    ser.write(b'\x02')   # Ctrl-B: exits raw REPL (left by Thonny) if needed
     time.sleep(0.2)
-    ser.write(b'\x04')   # Ctrl-D : provoque le redemarrage logiciel (relance code.py)
-    print("Redemarrage du robot en cours...")
+    ser.write(b'\x04')   # Ctrl-D: triggers the software restart (relaunches code.py)
+    print("Restarting the robot...")
 
-    # On affiche en direct tout ce qui est recu pendant le redemarrage,
-    # au lieu de le jeter, pour verifier que code.py demarre bien.
+    # We display everything received during the restart live,
+    # instead of discarding it, to check that code.py starts correctly.
     boot_deadline = time.monotonic() + 3.0
     while time.monotonic() < boot_deadline:
         if ser.in_waiting:
@@ -109,14 +109,14 @@ def main():
 
     cap = cv2.VideoCapture(0)
     if not cap.isOpened():
-        print("Erreur : impossible d'ouvrir la webcam.")
+        print("Error: unable to open the webcam.")
         ser.close()
         return
 
     last_sent_cmd = None
     last_send_time = time.monotonic()
     last_print_time = time.monotonic()
-    PRINT_INTERVAL = 0.5  # n'affiche les messages du robot qu'au maximum 2 fois/seconde
+    PRINT_INTERVAL = 0.5  # only display robot messages at most 2 times/second
 
     try:
         with mp_hands.Hands(
@@ -128,7 +128,7 @@ def main():
             while True:
                 ret, frame = cap.read()
                 if not ret:
-                    print("Erreur : impossible de lire l'image de la webcam. Arret.")
+                    print("Error: unable to read the webcam frame. Stopping.")
                     break
 
                 frame = cv2.flip(frame, 1)
@@ -136,7 +136,7 @@ def main():
                 results = hands.process(rgb_frame)
 
                 gesture_cmd = None
-                gesture_name = "Aucune main detectee"
+                gesture_name = "No hand detected"
 
                 if results.multi_hand_landmarks and results.multi_handedness:
                     for hand_landmarks, handedness in zip(
@@ -149,12 +149,12 @@ def main():
                         finger_states = get_finger_states(hand_landmarks, label)
                         gesture_cmd, gesture_name = classify_gesture(finger_states)
 
-                # Si aucune main n'est detectee, la commande effective est "stop"
+                # If no hand is detected, the effective command is "stop"
                 effective_cmd = gesture_cmd if gesture_cmd is not None else "stop"
                 now = time.monotonic()
 
-                # On renvoie la commande courante regulierement tant qu'elle est maintenue
-                # (mouvement continu), et immediatement si elle vient de changer (reactivite).
+                # We resend the current command regularly as long as it is held
+                # (continuous movement), and immediately if it just changed (responsiveness).
                 if effective_cmd != last_sent_cmd or (now - last_send_time) > SEND_INTERVAL:
                     payload = build_json_command(effective_cmd)
                     if payload is not None:
@@ -164,11 +164,11 @@ def main():
                             last_sent_cmd = effective_cmd
                             last_send_time = now
                         except serial.SerialException as e:
-                            print(f"Erreur d'envoi serie (robot deconnecte ?) : {e}")
+                            print(f"Serial send error (robot disconnected?): {e}")
 
-                # On lit les messages recus. On ignore les echos de nos propres commandes
-                # (lignes qui commencent par '{"cmd"') et on n'affiche que les vrais
-                # messages de statut du robot (x=... y=... angle=... mode=...).
+                # We read incoming messages. We ignore echoes of our own commands
+                # (lines starting with '{"cmd"') and only display genuine
+                # robot status messages (x=... y=... angle=... mode=...).
                 while ser.in_waiting:
                     try:
                         robot_line = ser.readline().decode(errors="ignore").strip()
@@ -181,26 +181,26 @@ def main():
                             last_print_time = now_print
 
                 cv2.putText(
-                    frame, f"Geste : {gesture_name}", (20, 40),
+                    frame, f"Gesture: {gesture_name}", (20, 40),
                     cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 255, 255), 2
                 )
                 cv2.putText(
-                    frame, f"Commande : {effective_cmd}", (20, 80),
+                    frame, f"Command: {effective_cmd}", (20, 80),
                     cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 2
                 )
-                cv2.imshow("Controle du robot par gestes", frame)
+                cv2.imshow("Gesture-Based Robot Control", frame)
 
                 if cv2.waitKey(1) & 0xFF == ord('q'):
                     break
 
     except Exception as e:
-        print(f"Erreur inattendue : {e}")
+        print(f"Unexpected error: {e}")
 
     finally:
         cap.release()
         cv2.destroyAllWindows()
         ser.close()
-        print("Ressources liberees proprement.")
+        print("Resources released cleanly.")
 
 
 if __name__ == "__main__":

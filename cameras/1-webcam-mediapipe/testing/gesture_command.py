@@ -1,12 +1,12 @@
 """
-Etape 3 : Reconnaissance de gestes precis et mapping vers des commandes
+Step 3: Precise gesture recognition and mapping to commands
 -------------------------------------------------------------------------
-4 gestes reconnus :
-- Poing ferme          -> STOP
-- Main ouverte          -> AVANCER
-- Index + pouce leves   -> TOURNER A GAUCHE
-- Index + auriculaire   -> TOURNER A DROITE
-Appuie sur 'q' pour quitter.
+4 recognized gestures:
+- Closed fist           -> STOP
+- Open hand             -> FORWARD
+- Index + thumb raised  -> TURN LEFT
+- Index + pinky raised  -> TURN RIGHT
+Press 'q' to quit.
 """
 
 import cv2
@@ -15,46 +15,46 @@ import mediapipe as mp
 mp_hands = mp.solutions.hands
 mp_draw = mp.solutions.drawing_utils
 
-# Indices MediaPipe : tip de chaque doigt (pouce, index, majeur, annulaire, auriculaire)
+# MediaPipe indices: tip of each finger (thumb, index, middle, ring, pinky)
 FINGER_TIPS = [4, 8, 12, 16, 20]
 
 
 def get_finger_states(hand_landmarks, handedness_label):
-    """Retourne un tuple de 5 booleens (pouce, index, majeur, annulaire, auriculaire)."""
+    """Returns a tuple of 5 booleans (thumb, index, middle, ring, pinky)."""
     landmarks = hand_landmarks.landmark
     states = []
 
-    # Pouce : comparaison horizontale, sens depend de la main gauche/droite
+    # Thumb: horizontal comparison, direction depends on left/right hand
     if handedness_label == "Right":
         thumb_up = landmarks[FINGER_TIPS[0]].x < landmarks[FINGER_TIPS[0] - 1].x
     else:
         thumb_up = landmarks[FINGER_TIPS[0]].x > landmarks[FINGER_TIPS[0] - 1].x
     states.append(thumb_up)
 
-    # Les 4 autres doigts : comparaison verticale (tip au-dessus de l'articulation)
+    # The other 4 fingers: vertical comparison (tip above the joint)
     for tip_id in FINGER_TIPS[1:]:
         states.append(landmarks[tip_id].y < landmarks[tip_id - 2].y)
 
-    return tuple(states)  # (pouce, index, majeur, annulaire, auriculaire)
+    return tuple(states)  # (thumb, index, middle, ring, pinky)
 
 
 def classify_gesture(finger_states):
-    """Associe un pattern de doigts a une commande robot."""
+    """Maps a finger pattern to a robot command."""
     thumb, index, middle, ring, pinky = finger_states
 
     if not thumb and not index and not middle and not ring and not pinky:
-        return "AVANCER", "Poing ferme"
+        return "FORWARD", "Closed fist"
 
     if thumb and index and middle and ring and pinky:
-        return "STOP", "Main ouverte"
+        return "STOP", "Open hand"
 
     if thumb and index and not middle and not ring and not pinky:
-        return "TOURNER A GAUCHE", "Index + pouce"
+        return "TURN LEFT", "Index + thumb"
 
     if not thumb and index and not middle and not ring and pinky:
-        return "TOURNER A DROITE", "Index + auriculaire"
+        return "TURN RIGHT", "Index + pinky"
 
-    return "AUCUNE COMMANDE", "Geste non reconnu"
+    return "NO COMMAND", "Gesture not recognized"
 
 
 def main():
@@ -75,7 +75,7 @@ def main():
             rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
             results = hands.process(rgb_frame)
 
-            command_text = "Aucune main detectee"
+            command_text = "No hand detected"
             gesture_name = ""
 
             if results.multi_hand_landmarks and results.multi_handedness:
@@ -91,15 +91,15 @@ def main():
                     command_text, gesture_name = classify_gesture(finger_states)
 
             cv2.putText(
-                frame, f"Geste : {gesture_name}", (20, 40),
+                frame, f"Gesture: {gesture_name}", (20, 40),
                 cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 255, 255), 2
             )
             cv2.putText(
-                frame, f"Commande : {command_text}", (20, 80),
+                frame, f"Command: {command_text}", (20, 80),
                 cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 2
             )
 
-            cv2.imshow("Reconnaissance de gestes - IOT Car", frame)
+            cv2.imshow("Gesture Recognition - IOT Car", frame)
 
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break

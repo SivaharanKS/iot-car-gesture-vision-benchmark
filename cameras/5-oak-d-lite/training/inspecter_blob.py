@@ -16,7 +16,7 @@ with dai.Pipeline() as pipeline:
     pipeline.start()
     inNn = nnQueue.get()
 
-    print("Noms des tenseurs de sortie :", inNn.getAllLayerNames())
+    print("Output tensor names:", inNn.getAllLayerNames())
     for nom in inNn.getAllLayerNames():
         tensor = inNn.getTensor(nom)
         print(f"  {nom} -> shape={tensor.shape}, dtype={tensor.dtype}")

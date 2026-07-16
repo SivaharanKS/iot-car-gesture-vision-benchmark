@@ -21,7 +21,7 @@ with dai.Pipeline() as pipeline:
     videoQueue = cam.requestOutput((640, 480)).createOutputQueue()
 
     pipeline.start()
-    print("Appuie sur 1=forward 2=stop 3=left 4=right pour capturer, q pour quitter")
+    print("Press 1=forward 2=stop 3=left 4=right to capture, q to quit")
 
     while pipeline.isRunning():
         videoIn = videoQueue.get()
@@ -38,8 +38,8 @@ with dai.Pipeline() as pipeline:
             compteurs[nom_geste] += 1
             chemin = os.path.join(DOSSIER_SORTIE, nom_geste, f"{nom_geste}_{compteurs[nom_geste]:03d}.jpg")
             cv2.imwrite(chemin, frame)
-            print(f"Capture : {chemin}  (total {nom_geste} = {compteurs[nom_geste]})")
+            print(f"Capture: {chemin}  (total {nom_geste} = {compteurs[nom_geste]})")
             time.sleep(0.2)
 
 cv2.destroyAllWindows()
-print("Termine. Recapitulatif :", compteurs)
+print("Done. Summary:", compteurs)

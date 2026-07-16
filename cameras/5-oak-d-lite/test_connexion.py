@@ -6,7 +6,7 @@ with dai.Pipeline() as pipeline:
     videoQueue = cam.requestOutput((640, 480)).createOutputQueue()
 
     pipeline.start()
-    print("Pipeline demarree. Appuie sur 'q' pour quitter.")
+    print("Pipeline started. Press 'q' to quit.")
 
     while pipeline.isRunning():
         videoIn = videoQueue.get()

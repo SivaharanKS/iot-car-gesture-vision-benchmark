@@ -7,20 +7,20 @@ import sys
 import json
 import math
 
-# Vitesse d'avance (fraction du duty cycle max, entre 0 et 1)
+# Forward speed (fraction of max duty cycle, between 0 and 1)
 FORWARD_SPEED = 0.25
 
-# Vitesse de rotation en pivot (tant que le geste de virage est detecte)
+# Pivot turning speed (as long as the turn gesture is detected)
 TURN_SPEED = 0.3
 
-# Etat partage du mode de deplacement courant
+# Shared state of the current movement mode
 state = {"mode": "stop"}  # "stop" | "forward" | "turn_left" | "turn_right"
 
-# Delai maximum (en secondes) sans commande recue avant arret de securite
+# Maximum delay (in seconds) without a received command before safety stop
 COMMAND_TIMEOUT = 0.4
 last_command_time = time.monotonic()
 
-# Position estimee du robot (odometrie), en metres, dans le repere de depart
+# Estimated robot position (odometry), in meters, in the starting reference frame
 pos_x = 0.0
 pos_y = 0.0
 last_left_ticks = robot.left_encoder.read()
@@ -28,7 +28,7 @@ last_right_ticks = robot.right_encoder.read()
 
 
 async def update_odometry(dt, angle_deg):
-    """Met a jour la position (pos_x, pos_y) a partir des encodeurs et de l'angle IMU."""
+    """Updates the position (pos_x, pos_y) from the encoders and the IMU angle."""
     global pos_x, pos_y, last_left_ticks, last_right_ticks
 
     left_ticks = robot.left_encoder.read()
@@ -80,8 +80,8 @@ async def command_handler():
 
 
 async def calibrate_gyro_bias(num_samples=100, delay=0.005):
-    """Mesure le biais du gyroscope au repos (robot immobile) au demarrage,
-    pour le soustraire ensuite et reduire la derive de l'angle."""
+    """Measures the gyroscope's resting bias (robot stationary) at startup,
+    to subtract it afterward and reduce angle drift."""
     total = 0.0
     for _ in range(num_samples):
         total += robot.imu.gyro[2]
@@ -98,9 +98,9 @@ async def angel_caculate(dt, radps, bias):
 async def control_loop():
     asyncio.create_task(command_handler())
 
-    robot.send_line("Calibration du gyroscope, ne pas bouger le robot...")
+    robot.send_line("Calibrating gyroscope, do not move the robot...")
     gyro_bias = await calibrate_gyro_bias()
-    robot.send_line(f"Calibration terminee, biais={gyro_bias:.5f}")
+    robot.send_line(f"Calibration complete, bias={gyro_bias:.5f}")
 
     last_time = time.monotonic()
 
@@ -113,8 +113,8 @@ async def control_loop():
         angle = await angel_caculate(dt, robot.imu.gyro[2], gyro_bias)
         await update_odometry(dt, angle)
 
-        # Securite : si aucune commande n'est recue depuis trop longtemps,
-        # on force l'arret du robot (main hors du cadre, webcam coupee, etc.)
+        # Safety: if no command has been received for too long,
+        # force the robot to stop (hand out of frame, webcam cut off, etc.)
         if time.monotonic() - last_command_time > COMMAND_TIMEOUT:
             state["mode"] = "stop"
 

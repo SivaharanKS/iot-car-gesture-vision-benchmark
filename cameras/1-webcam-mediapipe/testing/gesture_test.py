@@ -1,10 +1,10 @@
 """
-Etape 2 : Detection des gestes de la main
+Step 2: Hand gesture detection
 -------------------------------------------
-Ce script utilise MediaPipe pour detecter une main sur le flux webcam
-et affiche les points cles (landmarks) ainsi qu'un exemple simple
-de reconnaissance de geste (compter les doigts leves).
-Appuie sur 'q' pour quitter.
+This script uses MediaPipe to detect a hand on the webcam stream
+and displays the key points (landmarks) along with a simple
+gesture-recognition example (counting raised fingers).
+Press 'q' to quit.
 """
 
 import cv2
@@ -13,16 +13,16 @@ import mediapipe as mp
 mp_hands = mp.solutions.hands
 mp_draw = mp.solutions.drawing_utils
 
-# Indices des bouts de doigts (tip) dans le modele MediaPipe
+# Fingertip (tip) indices in the MediaPipe model
 FINGER_TIPS = [4, 8, 12, 16, 20]
 
 
 def count_fingers(hand_landmarks, handedness_label):
-    """Compte le nombre de doigts leves sur une main detectee."""
+    """Counts the number of raised fingers on a detected hand."""
     landmarks = hand_landmarks.landmark
     fingers_up = 0
 
-    # Pouce : comparaison horizontale (depend de la main gauche/droite)
+    # Thumb: horizontal comparison (depends on left/right hand)
     if handedness_label == "Right":
         if landmarks[FINGER_TIPS[0]].x < landmarks[FINGER_TIPS[0] - 1].x:
             fingers_up += 1
@@ -30,7 +30,7 @@ def count_fingers(hand_landmarks, handedness_label):
         if landmarks[FINGER_TIPS[0]].x > landmarks[FINGER_TIPS[0] - 1].x:
             fingers_up += 1
 
-    # Les 4 autres doigts : comparaison verticale (tip au-dessus de l'articulation)
+    # The other 4 fingers: vertical comparison (tip above the joint)
     for tip_id in FINGER_TIPS[1:]:
         if landmarks[tip_id].y < landmarks[tip_id - 2].y:
             fingers_up += 1
@@ -56,7 +56,7 @@ def main():
             rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
             results = hands.process(rgb_frame)
 
-            gesture_text = "Aucune main detectee"
+            gesture_text = "No hand detected"
 
             if results.multi_hand_landmarks and results.multi_handedness:
                 for hand_landmarks, handedness in zip(
@@ -68,14 +68,14 @@ def main():
 
                     label = handedness.classification[0].label
                     nb_doigts = count_fingers(hand_landmarks, label)
-                    gesture_text = f"Doigts leves : {nb_doigts}"
+                    gesture_text = f"Fingers up: {nb_doigts}"
 
             cv2.putText(
                 frame, gesture_text, (20, 40),
                 cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2
             )
 
-            cv2.imshow("Detection de gestes - IOT Car", frame)
+            cv2.imshow("Gesture Detection - IOT Car", frame)
 
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break

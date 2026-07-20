@@ -43,8 +43,8 @@ def mesurer_fps():
         nnQueue = nn.out.createOutputQueue()
 
         pipeline.start()
-        print("Positionne-toi devant la camera, puis appuie sur 's' pour demarrer la mesure (30 s).")
-        print("(Appuie sur 'q' pour quitter a tout moment)")
+        print("Position yourself in front of the camera, then press 's' to start the measurement (30 s).")
+        print("(Press 'q' to quit at any time)")
 
         dernier_label, dernier_score = "none", 0.0
         fps_affiche = 0.0
@@ -60,11 +60,11 @@ def mesurer_fps():
 
                 if demarrage:
                     t_ecoule = time.perf_counter() - t_start
-                    statut = f"MESURE EN COURS  {t_ecoule:4.1f}/{DUREE_MESURE:.0f}s   FPS instant. = {fps_affiche:5.1f}"
+                    statut = f"MEASURING  {t_ecoule:4.1f}/{DUREE_MESURE:.0f}s   instant. FPS = {fps_affiche:5.1f}"
                 else:
-                    statut = "Appuie sur 's' pour demarrer"
+                    statut = "Press 's' to start"
                 cv2.putText(frame, statut, (10, INPUT_SIZE - 15), cv2.FONT_HERSHEY_SIMPLEX, 0.5, couleur, 1)
-                cv2.imshow("OAK-D Lite - benchmark debit (FPS)", frame)
+                cv2.imshow("OAK-D Lite - throughput (FPS) benchmark", frame)
 
             if nnQueue.has():
                 resultat = nnQueue.get()
@@ -90,7 +90,7 @@ def mesurer_fps():
                 demarrage = True
                 t_start = time.perf_counter()
                 t_prev = t_start
-                print("Mesure demarree...")
+                print("Measurement started...")
             elif touche == ord('q'):
                 break
 
@@ -106,23 +106,23 @@ def generer_graphique(donnees_utiles, stats_global):
 
     axes[0].plot(t_rel, fps_vals, color="#4C72B0", linewidth=0.8)
     axes[0].axhline(stats_global["moyenne"], color="red", linestyle="--",
-                     label=f"Moyenne = {stats_global['moyenne']:.2f} FPS")
-    axes[0].set_title("FPS instantane au fil du temps - OAK-D Lite")
-    axes[0].set_xlabel("Temps (s)")
+                     label=f"Mean = {stats_global['moyenne']:.2f} FPS")
+    axes[0].set_title("Instantaneous FPS over time - OAK-D Lite")
+    axes[0].set_xlabel("Time (s)")
     axes[0].set_ylabel("FPS")
     axes[0].legend()
 
     axes[1].hist(fps_vals, bins=20, color="#55A868", edgecolor="black")
     axes[1].axvline(stats_global["moyenne"], color="red", linestyle="--",
-                     label=f"Moyenne = {stats_global['moyenne']:.2f} FPS")
-    axes[1].set_title("Distribution du FPS - OAK-D Lite")
+                     label=f"Mean = {stats_global['moyenne']:.2f} FPS")
+    axes[1].set_title("FPS distribution - OAK-D Lite")
     axes[1].set_xlabel("FPS")
-    axes[1].set_ylabel("Nombre de mesures")
+    axes[1].set_ylabel("Number of measurements")
     axes[1].legend()
 
     plt.tight_layout()
     plt.savefig("graphique_fps_oakd.png", dpi=150)
-    print("Graphique enregistre : graphique_fps_oakd.png")
+    print("Chart saved: graphique_fps_oakd.png")
     plt.show()
 
 
@@ -138,18 +138,18 @@ def main():
     stats_actif = calculer_stats(fps_actif)
     stats_none = calculer_stats(fps_none)
 
-    print("FPS global :", stats_global)
-    print("FPS (detection active) :", stats_actif)
-    print("FPS (aucune detection) :", stats_none)
+    print("Global FPS:", stats_global)
+    print("FPS (active detection):", stats_actif)
+    print("FPS (no detection):", stats_none)
 
     with open("resultats_fps_oakd.csv", "w", newline="") as f:
         writer = csv.writer(f)
-        writer.writerow(["categorie", "n", "moyenne", "mediane", "ecart_type", "min", "max"])
-        for nom, stats in [("Global", stats_global), ("Detection active", stats_actif), ("Aucune detection", stats_none)]:
+        writer.writerow(["category", "n", "mean", "median", "std_dev", "min", "max"])
+        for nom, stats in [("Global", stats_global), ("Active detection", stats_actif), ("No detection", stats_none)]:
             if stats:
                 writer.writerow([nom, stats["n"], stats["moyenne"], stats["mediane"],
                                   stats["ecart_type"], stats["min"], stats["max"]])
-    print("Resultats exportes dans resultats_fps_oakd.csv")
+    print("Results exported to resultats_fps_oakd.csv")
 
     if donnees_utiles:
         generer_graphique(donnees_utiles, stats_global)

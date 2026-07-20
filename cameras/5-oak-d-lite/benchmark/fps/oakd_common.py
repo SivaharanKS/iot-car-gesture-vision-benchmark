@@ -33,7 +33,7 @@ def creer_pipeline():
     return pipeline, nnQueue
 
 def creer_pipeline_avec_preview():
-    """Variante qui expose aussi le flux image (pour associer timestamps)."""
+    """Variant that also exposes the image stream (to associate timestamps)."""
     pipeline = dai.Pipeline()
     cam = pipeline.create(dai.node.Camera).build()
     camOut = cam.requestOutput((INPUT_SIZE, INPUT_SIZE), type=dai.ImgFrame.Type.BGR888p)

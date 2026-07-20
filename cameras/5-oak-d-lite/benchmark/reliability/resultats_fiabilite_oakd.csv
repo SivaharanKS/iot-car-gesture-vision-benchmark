@@ -1,5 +1,5 @@
-voulu,Forward,Stop,Left,Right,none
-Forward,20,0,0,0,0
-Stop,0,20,0,0,0
-Left,0,0,20,0,0
-Right,0,0,0,20,0
+intended,Forward,Stop,Left,Right,none
+Forward,19,0,0,0,1
+Stop,0,9,0,0,11
+Left,0,0,18,0,2
+Right,0,0,0,12,8

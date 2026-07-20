@@ -1,22 +1,22 @@
 """
-Benchmark - Metrique 2 : DEBIT / FPS (solution HuskyLens)
+Benchmark - Metric 2: THROUGHPUT / FPS (HuskyLens solution)
 ===========================================================
-Mesure la frequence a laquelle le PC peut lire un nouveau resultat aupres
-de la HuskyLens (boucle de requetes hl.learned()), adaptee de la version
-webcam (cap.read() + MediaPipe).
+Measures the rate at which the PC can read a new result from the
+HuskyLens (hl.learned() request loop), adapted from the webcam version
+(cap.read() + MediaPipe).
 
-Le FPS instantane est releve a chaque requete (1 / duree de la boucle) et
-classe selon qu'un geste actif est detecte (ID 1 a 4) ou non (ID 5/neutre
-ou aucune detection), afin de distinguer :
-  - FPS avec geste actif : cas d'usage reel du controle gestuel
-  - FPS sans geste (neutre)  : reference
+The instantaneous FPS is recorded on each request (1 / loop duration) and
+classified according to whether an active gesture is detected (ID 1 to 4)
+or not (ID 5/neutral or no detection), in order to distinguish:
+  - FPS with an active gesture: real gesture-control use case
+  - FPS with no gesture (neutral): reference
 
-La mesure dure DUREE_MESURE secondes. Les premieres secondes (echauffement
-de la connexion serie) sont exclues des statistiques.
+The measurement lasts DUREE_MESURE seconds. The first few seconds (serial
+connection warm-up) are excluded from the statistics.
 
-Sorties :
-  - un CSV avec le FPS de chaque requete ;
-  - un Excel (.xlsx) avec les donnees, les statistiques et des graphiques.
+Outputs:
+  - a CSV with the FPS of each request;
+  - an Excel (.xlsx) with the data, the statistics, and charts.
 """
 
 import time
@@ -28,14 +28,14 @@ from openpyxl.chart import LineChart, BarChart, Reference
 from openpyxl.styles import Font, PatternFill, Alignment
 
 # ----------------------------------------------------------------
-# Parametres a adapter
+# Parameters to adapt
 # ----------------------------------------------------------------
-COM_HUSKY = "COM25"   # port serie de la HuskyLens
+COM_HUSKY = "COM25"   # HuskyLens serial port
 
-DUREE_MESURE = 30.0   # duree de la mesure en secondes (regime etabli)
-WARMUP_SEC = 3.0      # duree d'echauffement ignoree au debut (secondes)
+DUREE_MESURE = 30.0   # measurement duration in seconds (steady state)
+WARMUP_SEC = 3.0      # warm-up duration ignored at the start (seconds)
 
-ID_NEUTRE = 5         # ID de la classe neutre (voir entrainement_huskylens.py)
+ID_NEUTRE = 5         # ID of the neutral class (see huskylens_training.py)
 
 TIMESTAMP = time.strftime('%Y%m%d_%H%M%S')
 CSV_FILENAME = f"benchmark_fps_huskylens_{TIMESTAMP}.csv"
@@ -57,34 +57,34 @@ def calculer_stats(valeurs):
 
 def afficher_stats(nom, stats):
     if stats is None:
-        print(f"  {nom} : aucune mesure.")
+        print(f"  {nom}: no measurements.")
         return
-    print(f"  {nom} ({stats['n']} requetes) :")
-    print(f"    FPS moyen    : {stats['moyenne']:.2f}")
-    print(f"    FPS median   : {stats['mediane']:.2f}")
-    print(f"    Ecart-type   : {stats['ecart_type']:.2f}")
-    print(f"    FPS min      : {stats['min']:.2f}")
-    print(f"    FPS max      : {stats['max']:.2f}")
+    print(f"  {nom} ({stats['n']} requests):")
+    print(f"    Mean FPS     : {stats['moyenne']:.2f}")
+    print(f"    Median FPS   : {stats['mediane']:.2f}")
+    print(f"    Std. dev.    : {stats['ecart_type']:.2f}")
+    print(f"    Min FPS      : {stats['min']:.2f}")
+    print(f"    Max FPS      : {stats['max']:.2f}")
 
 
 # ======================================================================
-# Mesure du FPS
+# FPS measurement
 # ======================================================================
 
 def mesurer_fps():
-    print("\n=== MESURE DU DEBIT (FPS) - HuskyLens ===")
-    print(f"Duree : {DUREE_MESURE:.0f} s (dont {WARMUP_SEC:.0f} s de warm-up ignorees).")
-    print("Alterne entre 'geste actif' et 'position neutre' pour mesurer les deux cas.\n")
+    print("\n=== THROUGHPUT (FPS) MEASUREMENT - HuskyLens ===")
+    print(f"Duration: {DUREE_MESURE:.0f} s (including {WARMUP_SEC:.0f} s of warm-up, ignored).")
+    print("Alternate between 'active gesture' and 'neutral position' to measure both cases.\n")
 
     try:
         hl = HuskyLensLibrary("SERIAL", COM_HUSKY)
         print(hl.knock())
         hl.algorthim("ALGORITHM_OBJECT_CLASSIFICATION")
     except Exception as e:
-        print(f"Erreur de connexion a la HuskyLens ({COM_HUSKY}) : {e}")
+        print(f"Connection error to the HuskyLens ({COM_HUSKY}): {e}")
         return []
 
-    # Chaque entree : (temps_relatif_s, fps_instantane, geste_actif 0/1, warmup 0/1)
+    # Each entry: (relative_time_s, instantaneous_fps, active_gesture 0/1, warmup 0/1)
     donnees = []
 
     t_start = time.perf_counter()
@@ -110,9 +110,9 @@ def mesurer_fps():
 
         idx = len(donnees)
         if idx % 50 == 0:
-            phase = "WARM-UP" if warmup else "MESURE"
+            phase = "WARM-UP" if warmup else "MEASURE"
             print(f"  {phase}  t={t_rel:.1f}s / {DUREE_MESURE:.0f}s  "
-                  f"FPS={fps:.1f}  Geste actif={'OUI' if geste_actif else 'non'}")
+                  f"FPS={fps:.1f}  Active gesture={'YES' if geste_actif else 'no'}")
 
         if t_rel >= DUREE_MESURE:
             break
@@ -121,16 +121,16 @@ def mesurer_fps():
 
 
 # ======================================================================
-# Export CSV et Excel
+# CSV and Excel export
 # ======================================================================
 
 def exporter_csv(donnees):
     with open(CSV_FILENAME, "w", newline="", encoding="utf-8") as f:
         writer = csv.writer(f)
-        writer.writerow(["temps_s", "fps", "geste_actif", "warmup"])
+        writer.writerow(["time_s", "fps", "active_gesture", "warmup"])
         for t_rel, fps, actif, warmup in donnees:
             writer.writerow([f"{t_rel:.3f}", f"{fps:.2f}", actif, warmup])
-    print(f"\n  Donnees brutes (CSV) : {CSV_FILENAME}")
+    print(f"\n  Raw data (CSV): {CSV_FILENAME}")
 
 
 def exporter_excel(donnees_utiles, stats_global, stats_actif, stats_neutre):
@@ -141,11 +141,11 @@ def exporter_excel(donnees_utiles, stats_global, stats_actif, stats_neutre):
     titre_font = Font(bold=True, size=13)
 
     ws = wb.active
-    ws.title = "Donnees"
-    ws["A1"] = "Mesure du debit (FPS) HuskyLens - regime etabli (warm-up exclu)"
+    ws.title = "Data"
+    ws["A1"] = "HuskyLens throughput (FPS) measurement - steady state (warm-up excluded)"
     ws["A1"].font = titre_font
 
-    entetes = ["Requete", "Temps (s)", "FPS", "Geste actif"]
+    entetes = ["Request", "Time (s)", "FPS", "Active gesture"]
     for col, txt in enumerate(entetes, start=1):
         c = ws.cell(row=3, column=col, value=txt)
         c.fill = entete_fill
@@ -163,11 +163,11 @@ def exporter_excel(donnees_utiles, stats_global, stats_actif, stats_neutre):
 
     n = len(donnees_utiles)
 
-    ws_stats = wb.create_sheet("Statistiques")
-    ws_stats["A1"] = "Statistiques du debit (FPS) HuskyLens"
+    ws_stats = wb.create_sheet("Statistics")
+    ws_stats["A1"] = "HuskyLens throughput (FPS) statistics"
     ws_stats["A1"].font = titre_font
 
-    entetes_s = ["Metrique", "Global", "Geste actif", "Neutre"]
+    entetes_s = ["Metric", "Global", "Active gesture", "Neutral"]
     for col, txt in enumerate(entetes_s, start=1):
         c = ws_stats.cell(row=3, column=col, value=txt)
         c.fill = entete_fill
@@ -183,12 +183,12 @@ def exporter_excel(donnees_utiles, stats_global, stats_actif, stats_neutre):
         )
 
     lignes = [
-        ligne_stat("Nombre de requetes", "n"),
-        ligne_stat("FPS moyen", "moyenne"),
-        ligne_stat("FPS median", "mediane"),
-        ligne_stat("Ecart-type", "ecart_type"),
-        ligne_stat("FPS min", "min"),
-        ligne_stat("FPS max", "max"),
+        ligne_stat("Number of requests", "n"),
+        ligne_stat("Mean FPS", "moyenne"),
+        ligne_stat("Median FPS", "mediane"),
+        ligne_stat("Std. deviation", "ecart_type"),
+        ligne_stat("Min FPS", "min"),
+        ligne_stat("Max FPS", "max"),
     ]
     for r, (nom, g, a, ne) in enumerate(lignes, start=4):
         ws_stats.cell(row=r, column=1, value=nom).font = Font(bold=True)
@@ -199,10 +199,10 @@ def exporter_excel(donnees_utiles, stats_global, stats_actif, stats_neutre):
     for col in ("A", "B", "C", "D"):
         ws_stats.column_dimensions[col].width = 18
 
-    # --- Graphique 1 : FPS instantane au fil du temps (courbe unique) ---
+    # --- Chart 1: instantaneous FPS over time (single curve) ---
     chart1 = LineChart()
-    chart1.title = "Debit (FPS) HuskyLens au fil des requetes"
-    chart1.x_axis.title = "Requete"
+    chart1.title = "HuskyLens throughput (FPS) over the requests"
+    chart1.x_axis.title = "Request"
     chart1.y_axis.title = "FPS"
     chart1.height = 8
     chart1.width = 18
@@ -214,10 +214,10 @@ def exporter_excel(donnees_utiles, stats_global, stats_actif, stats_neutre):
     chart1.series[0].graphicalProperties.line.width = 15000
     ws.add_chart(chart1, "F3")
 
-    # --- Graphique 2 : barres comparatives FPS moyen (global / actif / neutre) ---
+    # --- Chart 2: bar comparison of mean FPS (global / active / neutral) ---
     chart2 = BarChart()
     chart2.type = "col"
-    chart2.title = "FPS moyen selon la presence d'un geste actif"
+    chart2.title = "Mean FPS depending on active gesture presence"
     chart2.y_axis.title = "FPS"
     chart2.height = 8
     chart2.width = 12
@@ -229,21 +229,21 @@ def exporter_excel(donnees_utiles, stats_global, stats_actif, stats_neutre):
     ws_stats.add_chart(chart2, "F3")
 
     wb.save(XLSX_FILENAME)
-    print(f"  Fichier Excel (donnees + graphiques) : {XLSX_FILENAME}")
+    print(f"  Excel file (data + charts): {XLSX_FILENAME}")
 
 
 # ======================================================================
-# Programme principal
+# Main program
 # ======================================================================
 
 def main():
     print("=" * 55)
-    print(" BENCHMARK DEBIT (FPS) - Solution HuskyLens")
+    print(" THROUGHPUT (FPS) BENCHMARK - HuskyLens solution")
     print("=" * 55)
 
     donnees = mesurer_fps()
     if not donnees:
-        print("Aucune donnee mesuree.")
+        print("No data measured.")
         return
 
     donnees_utiles = [d for d in donnees if d[3] == 0]
@@ -257,13 +257,13 @@ def main():
     stats_neutre = calculer_stats(fps_neutre)
 
     print("\n" + "=" * 55)
-    print(" RESULTATS (warm-up exclu)")
+    print(" RESULTS (warm-up excluded)")
     print("=" * 55)
-    afficher_stats("FPS global", stats_global)
+    afficher_stats("Global FPS", stats_global)
     print()
-    afficher_stats("FPS geste actif", stats_actif)
+    afficher_stats("FPS active gesture", stats_actif)
     print()
-    afficher_stats("FPS neutre", stats_neutre)
+    afficher_stats("FPS neutral", stats_neutre)
 
     exporter_csv(donnees)
     if stats_global:
